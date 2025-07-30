@@ -69,39 +69,39 @@ var is_full = progress_bar.is_full()
 
 ## Signals
 
------------------------------------------------------------------------
-|  signal value_changed(old_value: float, new_value: float)           |
-|  signal value_depleted()  # When bar reaches 0                      |
-|  signal value_maxed()     # When bar reaches maximum                |
-|  signal segment_lost(segment_index: int)                            |
-|  signal segment_gained(segment_index: int)                          |
------------------------------------------------------------------------
+```
+signal value_changed(old_value: float, new_value: float)           
+signal value_depleted()  # When bar reaches 0                      
+signal value_maxed()     # When bar reaches maximum                
+signal segment_lost(segment_index: int)                            
+signal segment_gained(segment_index: int)                          
+```
 
 ## Common Use Cases
 
 ### Health Bar
----------------------------------------------------------------------------------
-|  # Set up health bar                                                          |
-|  health_bar.material.set_shader_parameter("bar_mode", 2)  # Health Bar mode   |
-|  health_bar.set_max_value(100.0)                                              |
-|  health_bar.flow_mode = "Continuous"                                          |
-|  health_bar.effect_type = "Flash"                                             |
----------------------------------------------------------------------------------
+```
+# Set up health bar                                                          
+health_bar.material.set_shader_parameter("bar_mode", 2)  # Health Bar mode   
+health_bar.set_max_value(100.0)                                              
+health_bar.flow_mode = "Continuous"                                          
+health_bar.effect_type = "Flash"                                             
+```
 
 ### XP/Level Bar
----------------------------------------------------------------------------------
-|  # Set up XP bar with segments                                                |
-|  xp_bar.material.set_shader_parameter("segment_count", 10)                    |
-|  xp_bar.flow_mode = "Discrete"                                                |
-|  xp_bar.fill_type = "Pour&Step"                                               |
----------------------------------------------------------------------------------
+```
+# Set up XP bar with segments                                                
+xp_bar.material.set_shader_parameter("segment_count", 10)                    
+xp_bar.flow_mode = "Discrete"                                                
+xp_bar.fill_type = "Pour&Step"                                               
+```
 
 ### Mana/Energy Bar
----------------------------------------------------------------------------------
-|  # Set up mana bar with fluid effect                                          |
-|  mana_bar.material.set_shader_parameter("bar_mode", 4)  # Fluid mode          |
-|  mana_bar.material.set_shader_parameter("effect_mode", 2)  # Bubbles          |
----------------------------------------------------------------------------------
+```
+# Set up mana bar with fluid effect                                         
+mana_bar.material.set_shader_parameter("bar_mode", 4)  # Fluid mode         
+mana_bar.material.set_shader_parameter("effect_mode", 2)  # Bubbles         
+```
 
 ## Custom Frames
 
