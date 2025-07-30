@@ -19,7 +19,7 @@ A customizable progress bar system for Godot 4 with visual effects, animations, 
 4. Configure the bar in the inspector or through code
 
 ## Basic Usage
-
+```
 # Set up the bar
 progress_bar.set_max_value(100.0)
 progress_bar.set_bar_value(75.0)
@@ -32,7 +32,7 @@ progress_bar.increase_bar_value(10.0)
 var current = progress_bar.get_current_value()
 var percentage = progress_bar.get_percentage()
 var is_full = progress_bar.is_full()
-
+```
 
 ## Shader Parameters
 
