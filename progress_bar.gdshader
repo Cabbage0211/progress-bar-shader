@@ -124,7 +124,7 @@ uniform float horizontal_border_size = 1.0;
 uniform float inner_border_thickness_multiplier = 1.0;
 uniform float outer_border_size = 3.0;
 //** Amount of slant/skew applied to segments (0.0 = rectangular).
-// TIP: For non rectangular segments set the margin parameter value to the same value as the slant amount but always negative. 
+// TIP: For non rectangular segments set the margin parameter value to the same value as the slant amount but always negative.
 // EX: Slant: 0.1 = Margin -0.1. Slant: -0.04 = Margin: -0.04 */
 uniform float slant_amount : hint_range(-0.5, 0.5) = 0.0;
 //** Generally scale down/up the entire progressbar */
@@ -152,12 +152,12 @@ float noise2D(vec2 p) {
     vec2 i = floor(p);
     vec2 f = fract(p);
     f = f * f * (3.0 - 2.0 * f);
-    
+
     float a = hash(i);
     float b = hash(i + vec2(1.0, 0.0));
     float c = hash(i + vec2(0.0, 1.0));
     float d = hash(i + vec2(1.0, 1.0));
-    
+
     return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
 }
 
@@ -165,7 +165,7 @@ float fbm(vec2 p, int octaves) {
     float value = 0.0;
     float amplitude = 0.5;
     float frequency = 1.0;
-    
+
     for (int i = 0; i < octaves; i++) {
         value += amplitude * noise2D(p * frequency);
         frequency *= 2.0;
@@ -188,24 +188,24 @@ vec4 generate_fluid_color(vec2 uv, float segment_index, float fill_ratio) {
     float time_offset = TIME * fluid_flow_speed;
     vec2 noise_uv = uv * fluid_noise_scale;
     noise_uv.x -= time_offset;
-    
+
     vec2 warped_uv = domain_warp(noise_uv, time_offset);
     float flow_noise = fbm(warped_uv, 5);
     float turbulence = fbm(warped_uv * 2.0 + vec2(time_offset * 0.7, -time_offset * 0.3), 3) * 0.5;
     float combined_noise = flow_noise + turbulence * fluid_turbulence;
-    
+
     float depth_factor = gas_mode ? 1.0 - uv.y : uv.y;
-    
+
     vec2 bubble_uv = uv * 8.0;
     bubble_uv.x -= time_offset * 1.5;
     bubble_uv.y += sin(uv.x * 6.0 + time_offset) * 0.2;
-    
+
     float bubble_pattern = 0.0;
     for (int i = 0; i < 3; i++) {
         float bubble_scale = pow(2.0, float(i));
         bubble_pattern += noise2D(bubble_uv * bubble_scale) / bubble_scale;
     }
-    
+
     float wisp_factor = 1.0;
     if (gas_mode) {
         wisp_factor = smoothstep(0.2, 0.8, combined_noise) * gas_intensity;
@@ -213,20 +213,20 @@ vec4 generate_fluid_color(vec2 uv, float segment_index, float fill_ratio) {
         float wisp_flow = fbm(vec2(uv.x * 3.0, uv.y * 2.0 - time_offset * 0.5), 4);
         combined_noise = mix(combined_noise, wisp_flow, 0.4);
     }
-    
+
     float highlight_factor = smoothstep(0.6, 1.0, combined_noise + bubble_pattern * 0.3);
     float shadow_factor = smoothstep(0.4, 0.0, combined_noise);
-    
+
     vec3 final_color = fluid_base_color.rgb;
     final_color = mix(fluid_shadow_color.rgb, final_color, depth_factor * 0.7 + 0.3);
     final_color = mix(final_color, fluid_highlight_color.rgb, highlight_factor * 0.8);
     final_color = mix(final_color, fluid_shadow_color.rgb, shadow_factor * 0.4);
-    
+
     if (gas_mode) {
         final_color = mix(final_color, fluid_highlight_color.rgb, (1.0 - wisp_factor) * 0.3);
         return vec4(final_color, fluid_base_color.a * (0.7 + wisp_factor * 0.3));
     }
-    
+
     float surface_flow = sin(uv.x * 4.0 - TIME * fluid_flow_speed * 2.0) * 0.1 + 0.9;
     final_color *= surface_flow;
     return vec4(final_color, fluid_base_color.a);
@@ -234,13 +234,13 @@ vec4 generate_fluid_color(vec2 uv, float segment_index, float fill_ratio) {
 
 vec4 apply_effect(vec4 base_color, vec2 uv, float segment_index, float fill_ratio) {
     float t = TIME * effect_speed;
-    
+
     if (effect_mode == 1) { // Wave
         float wave_pos = fract(-uv.x + t);
         float dist = abs(wave_pos - 0.5);
         float wave = exp(-pow(dist / wave_thickness, 2.0));
         base_color.rgb = mix(base_color.rgb, vec3(1.0), wave * effect_strength);
-    } 
+    }
       // TODO: Make bubbles more random and organic
       else if (effect_mode == 2) { // Bubbles
         float bubbles = 0.0;
@@ -272,7 +272,7 @@ vec4 apply_effect(vec4 base_color, vec2 uv, float segment_index, float fill_rati
         float seed = hash(pixelatedUV + floor(TIME * effect_speed * 10.0));
         float threshold = mix(0.7, 0.3, effect_strength);
         float pixelActive = step(threshold, seed);
-        
+
         vec3 pixelColor = base_color.rgb;
         if (pixelActive > 0.5) {
             float colorVar = hash(pixelatedUV * 2.0);
@@ -284,7 +284,7 @@ vec4 apply_effect(vec4 base_color, vec2 uv, float segment_index, float fill_rati
         }
         base_color.rgb = mix(base_color.rgb, pixelColor, effect_strength * 1.5);
     }
-    
+
     return base_color;
 }
 
@@ -296,11 +296,11 @@ void fragment() {
     // Frame processing
     vec4 frame_color = texture(frame_texture, UV);
     bool draw_frame = custom_frame && frame_color.a > alpha_threshold;
-    
+
     if (draw_frame && frame_color.a < 1.0) {
         frame_color.a = max(frame_color.a, frame_edge_opacity);
     }
-    
+
     // If 'custom_frame' is enabled, the progress bar will only render
     // inside the visible (transparent) area of the given 'frame_texture'.
 
@@ -324,14 +324,14 @@ void fragment() {
     vec4 bar_color = vec4(0.0);
     bool render_bar = true;
     float mask_alpha = 1.0;
-    
+
     // Frame-based clipping
     if (custom_frame) {
         vec2 trim_uv = mix(vec2(frame_trim), vec2(1.0 - frame_trim), UV);
         float step_size = 1.0 / float(scan_steps);
         float top_limit = 0.0;
         float bottom_limit = 1.0;
-        
+
         // Find frame boundaries
         for (int i = 0; i < scan_steps; i++) {
             float y = float(i) * step_size;
@@ -340,7 +340,7 @@ void fragment() {
                 break;
             }
         }
-        
+
         for (int i = 0; i < scan_steps; i++) {
             float y = 1.0 - float(i) * step_size;
             if (texture(frame_texture, vec2(trim_uv.x, y)).a > alpha_threshold) {
@@ -348,10 +348,10 @@ void fragment() {
                 break;
             }
         }
-        
+
         top_limit = clamp(top_limit - mask_expansion, 0.0, 1.0);
         bottom_limit = clamp(bottom_limit + mask_expansion, 0.0, 1.0);
-        
+
         if (trim_uv.y < top_limit || trim_uv.y > bottom_limit) {
             render_bar = false;
         } else {
@@ -361,13 +361,13 @@ void fragment() {
             if (mask_alpha < 0.1) render_bar = false;
         }
     }
-    
+
     // Progress bar rendering
     if (render_bar) {
         vec2 uv = mix(vec2(scale), vec2(1.0 - scale), UV);
         vec2 slanted_uv = uv;
         slanted_uv.x += slant_amount * (0.5 - uv.y) * 2.0;
-        
+
         if (slanted_uv.x < -slant_clip_margin || slanted_uv.x > 1.0 + slant_clip_margin) {
             render_bar = false;
         } else {
@@ -375,7 +375,7 @@ void fragment() {
             float current_segment = floor(slanted_uv.x / segment_width);
             float segment_pos = fract(slanted_uv.x / segment_width);
             float half_gap = segment_gap * 0.5;
-            
+
             if (segment_pos < half_gap || segment_pos > (1.0 - half_gap)) {
                 render_bar = false;
             } else {
@@ -384,7 +384,7 @@ void fragment() {
                 float fill_ratio = 0.0;
                 float segment_fill = 0.0;
                 bool is_filled = false;
-                
+
                 if (fill_mode == 0) { // Discrete
                     is_filled = current_segment < float(discrete_fill_amount);
                     fill_ratio = float(discrete_fill_amount) / float(segment_count);
@@ -402,14 +402,14 @@ void fragment() {
                     fill_ratio = pour_fill_amount;
                     float progress = pour_fill_amount * float(segment_count);
                     segment_fill = clamp(progress - current_segment, 0.0, 1.0);
-                    
+
                     if (bar_mode == 3) { // Rainbow Wave
                         float wave_influence = sin((slanted_uv.x - TIME * animation_speed) * 10.0) * 0.05;
                         segment_fill = clamp(segment_fill + wave_influence, 0.0, 1.0);
                     }
                     is_filled = segment_fill > 0.0;
                 }
-                
+
                 // Color calculation
                 if (is_filled) {
                     if (bar_mode == 2) { // Health Bar
@@ -440,7 +440,7 @@ void fragment() {
                     } else { // Solid
                         base_color = filled_color;
                     }
-                    
+
 
                     // Apply gradients
                     if (horizontal_gradient) {
@@ -455,21 +455,21 @@ void fragment() {
                         float brightness = mix(1.0 - H_gradient_strength, 1.0, gradient_factor);
                         base_color.rgb *= brightness;
                     }
-                    
+
                     if (vertical_gradient) {
                         float y_dist = abs(uv.y - 0.5) * 2.0;
                         float brightness = mix(1.0, 1.0 - V_gradient_strength, y_dist);
                         base_color.rgb *= brightness;
                     }
-                    
+
                     // Apply effects
                     base_color = apply_effect(base_color, slanted_uv, current_segment, fill_ratio);
-                    
+
                     // Fill mode blending
                     if (fill_mode == 1) { // Fade
                         if (segment_count == 1) {
                             float segment_local_pos = segment_pos;
-                            
+
                             if (single_segment_fade_progress < 1.0) {
                                 if (single_segment_fade_from > single_segment_fade_to) {
                                     // Fade-out
@@ -499,7 +499,7 @@ void fragment() {
                     } else if (fill_mode == 2) { // Pour
                         float segment_local_pos = segment_pos;
                         float fill_cutoff = segment_fill;
-                        
+
                         if (bar_mode == 3) { // Rainbow Wave smooth blending
                             float edge_width = 0.05;
                             float fill_amount = smoothstep(fill_cutoff - edge_width, fill_cutoff + edge_width, segment_local_pos);
@@ -513,7 +513,7 @@ void fragment() {
                 } else {
                     base_color = background_color;
                 }
-                
+
                 // Flash effects
                 if (flash_type == 1 && int(current_segment) == flash_segment) {
                     base_color.rgb = mix(base_color.rgb, flash_color.rgb, flash_intensity);
@@ -536,42 +536,42 @@ void fragment() {
                         base_color.rgb = mix(base_color.rgb, flash_color.rgb, flash_intensity);
                     }
                 }
-                
+
                 // Border rendering
                 float horizontal_border_thickness = universal_border_size * horizontal_border_size;
                 float inner_border_thickness = universal_border_size * inner_border_thickness_multiplier;
-                
+
                 bool is_horizontal_border = universal_border_size > 0.0 && (
                     uv.y < (scale + horizontal_border_thickness) ||
                     uv.y > (1.0 - scale - horizontal_border_thickness)
                 );
-                
+
                 bool is_inner_vertical_border = false;
                 bool is_at_left_gap = segment_pos < (half_gap + inner_border_thickness);
                 bool is_at_right_gap = segment_pos > (1.0 - half_gap - inner_border_thickness);
                 bool is_between_segments = (current_segment > 0.0 && is_at_left_gap) ||
                                           (current_segment < float(segment_count - 1) && is_at_right_gap);
                 if (is_between_segments) is_inner_vertical_border = true;
-                
+
                 bool is_outer_border = false;
                 if (universal_border_size > 0.0) {
                     const float EPSILON = 0.001;
                     if (abs(current_segment) < EPSILON && segment_pos < (half_gap + universal_border_size * outer_border_size)) {
                         is_outer_border = true;
                     }
-                    if (abs(current_segment - float(segment_count - 1)) < EPSILON && 
+                    if (abs(current_segment - float(segment_count - 1)) < EPSILON &&
                         segment_pos > (1.0 - half_gap - universal_border_size * outer_border_size)) {
                         is_outer_border = true;
                     }
                 }
-                
+
                 bool is_border = is_horizontal_border || is_inner_vertical_border || is_outer_border;
                 bar_color = is_border ? border_color : base_color;
                 bar_color.a *= mask_alpha;
             }
         }
     }
-    
+
     // Final output
     if (draw_frame) {
         COLOR = render_bar ? mix(bar_color, frame_color, frame_color.a) : frame_color;
