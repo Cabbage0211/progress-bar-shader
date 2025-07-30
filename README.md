@@ -2,6 +2,12 @@
 
 A customizable progress bar system for Godot 4 with visual effects, animations, and multiple display modes.
 
+
+
+https://github.com/user-attachments/assets/27a43fcf-3a40-47f5-b3e7-bb26d39a4662
+
+
+
 ## Features
 
   * Multiple bar styles: Solid, RGB, Health Bar, Rainbow Wave, Fluid
