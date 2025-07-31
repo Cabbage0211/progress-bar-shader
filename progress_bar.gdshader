@@ -115,7 +115,7 @@ uniform float H_gradient_strength : hint_range(0.0, 1.0) = 0.75;
 // Segment layout
 group_uniforms SegmentSettings;
 //** Gap between segments (0.0 = no gap, 0.1 = 10% gap).
-// NOTE: Values above 0.5 usually are not needed but in case more than 1.0 is required change the range in this shader at line 124*/
+// NOTE: Values above 0.5 usually are not needed but in case more than 1.0 is required change the range of this parameter at line 119*/
 uniform float segment_gap : hint_range(0.0, 1.0) = 0.05;
 //** Universal thickness of segment borders. When adjusted all four sizes scale equally.
 // NOTE: For better acuracy use the parameters bellow. */
