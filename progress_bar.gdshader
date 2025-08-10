@@ -129,6 +129,8 @@ uniform float outer_border_size = 3.0;
 uniform float slant_amount : hint_range(-0.5, 0.5) = 0.0;
 //** Generally scale down/up the entire progressbar */
 uniform float scale : hint_range(-1.0, 1.0) = 0.0;
+//** Manually move the progress bar left or right inside the frame. Positive values move it right, negative values move it left. */
+uniform float x_offset : hint_range(-0.1, 0.1) = 0.0;
 //** Adjust clipping margin for slanted segments if corners are cut off */
 uniform float slant_clip_margin : hint_range(-0.1, 0.1) = 0.0;
 
@@ -364,7 +366,13 @@ void fragment() {
 
     // Progress bar rendering
     if (render_bar) {
-        vec2 uv = mix(vec2(scale), vec2(1.0 - scale), UV);
+		// Create a new set of UVs for the bar, applying the manual x_offset.
+		// This moves the bar horizontally without affecting the custom frame mask.
+		// A positive offset value moves the bar to the right.
+		vec2 offset_uv = UV;
+		offset_uv.x -= x_offset;
+		
+        vec2 uv = mix(vec2(scale), vec2(1.0 - scale), offset_uv);
         vec2 slanted_uv = uv;
         slanted_uv.x += slant_amount * (0.5 - uv.y) * 2.0;
 
